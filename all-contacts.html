@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Contacts</title>
+    <link rel="stylesheet" href="nav.css">
+    <link rel="stylesheet" href="all-contacts.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="all-contacts.html" class="active"><i class="fas fa-address-book"></i> Contacts</a></li>
+            <li><a href="about.html"><i class="fas fa-info-circle"></i> About</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>All Contacts</h1>
+        <table class="contacts-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="contactsTableBody">
+                <!-- Dynamic rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const fetchContacts = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/contacts');
+                const contacts = await response.json();
+
+                const tableBody = document.getElementById('contactsTableBody');
+                tableBody.innerHTML = '';
+
+                contacts.forEach(contact => {
+                    const row = document.createElement('tr');
+
+                    const nameCell = document.createElement('td');
+                    const emailCell = document.createElement('td');
+                    const phoneCell = document.createElement('td');
+                    const actionsCell = document.createElement('td');
+
+                    nameCell.textContent = contact.name;
+                    emailCell.textContent = contact.email;
+                    phoneCell.textContent = contact.phone;
+
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Edit';
+                    editButton.classList.add('btn', 'btn-edit');
+                    editButton.addEventListener('click', () => updateContact(contact));
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.classList.add('btn', 'btn-delete');
+                    deleteButton.addEventListener('click', () => deleteContact(contact.id));
+
+                    actionsCell.appendChild(editButton);
+                    actionsCell.appendChild(deleteButton);
+
+                    row.appendChild(nameCell);
+                    row.appendChild(emailCell);
+                    row.appendChild(phoneCell);
+                    row.appendChild(actionsCell);
+
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching contacts:', error);
+            }
+        };
+
+                const deleteContact = async (id) => {
+            try {
+                const response = await fetch(`http://localhost:3000/contacts/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    alert('Contact deleted successfully');
+                    fetchContacts(); // Refresh the contact list
+                } else {
+                    alert('Failed to delete contact');
+                }
+            } catch (error) {
+                console.error('Error deleting contact:', error);
+            }
+        };
+
+                    const updateContact = (contact) => {
+                const name = prompt('Enter new name:', contact.name);
+                const email = prompt('Enter new email:', contact.email);
+                const phone = prompt('Enter new phone:', contact.phone);
+
+                if (name && email && phone) {
+                    const updatedContact = { name, email, phone };
+                    saveUpdatedContact(contact.id, updatedContact);
+                }
+            };
+
+            const saveUpdatedContact = async (id, updatedContact) => {
+                try {
+                    const response = await fetch(`http://localhost:3000/contacts/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updatedContact)
+                    });
+
+                    if (response.ok) {
+                        alert('Contact updated successfully');
+                        fetchContacts(); // Refresh the contact list
+                    } else {
+                        alert('Failed to update contact');
+                    }
+                } catch (error) {
+                    console.error('Error updating contact:', error);
+                }
+            };
+
+
+
+
+        // Call the function to fetch and display contacts
+        fetchContacts();
+    </script>
+</body>
+</html>
